@@ -136,10 +136,11 @@ def binarization(img, s_thresh=(160, 240), sx_thresh=(20, 200), r_thresh=(220, 2
     # Apply each of the thresholding functions
     binary = np.zeros_like(r_binary)
 
-    binary[(gradx == 1)
-             | (s_binary == 1)
+    binary[ (gradx == 1)
+             |(s_binary == 1)
              | (binary == 1)
-             ] = 1
+             | (r_binary == 1)
+    ] = 1
     return binary
 
 def find_peaks(binary):
@@ -150,7 +151,7 @@ def find_peaks(binary):
     rightx_base = np.argmax(histogram[midpoint:]) + midpoint
 
     # Choose the number of sliding windows
-    nwindows = 9
+    nwindows = 6
 
     # Set height of windows
     window_height = np.int(binary.shape[0] // nwindows)
@@ -195,5 +196,37 @@ def find_peaks(binary):
         if len(good_right_inds) > minpix:
             rightx_current = np.int(np.mean(nonzerox[good_right_inds]))
 
+    # Concatenate the arrays of indices
+    left_lane_inds = np.concatenate(left_lane_inds)
+    right_lane_inds = np.concatenate(right_lane_inds)
+
+    # Extract left and right line pixel positions
+    leftx = nonzerox[left_lane_inds]
+    lefty = nonzeroy[left_lane_inds]
+    rightx = nonzerox[right_lane_inds]
+    righty = nonzeroy[right_lane_inds]
+
+    # Fit a second order polynomial to each
+    left_fit = np.polyfit(lefty, leftx, 2)
+    right_fit = np.polyfit(righty, rightx, 2)
+
+    # Generate x and y values for plotting
+    ploty = np.linspace(0, binary.shape[0] - 1, binary.shape[0])
+    left_fitx = left_fit[0] * ploty ** 2 + left_fit[1] * ploty + left_fit[2]
+    right_fitx = right_fit[0] * ploty ** 2 + right_fit[1] * ploty + right_fit[2]
+
+    out_img[nonzeroy[left_lane_inds], nonzerox[left_lane_inds]] = [255, 0, 0]
+    out_img[nonzeroy[right_lane_inds], nonzerox[right_lane_inds]] = [0, 0, 255]
     plt.imshow(out_img)
+    plt.plot(left_fitx, ploty, color='yellow')
+    plt.plot(right_fitx, ploty, color='yellow')
+    plt.xlim(0, 1280)
+    plt.ylim(720, 0)
+    plt.show()
+
+
+if __name__ == '__main__':
+    test_img = cv2.imread('test_images/test4.jpg')
+    binary = binarization(test_img)
+    plt.imshow(binary, cmap='gray')
     plt.show()
