@@ -5,9 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 
-from tools import cal_undistort, unwrap, binarization
-
-
+from tools import cal_undistort, unwrap, binarization, find_peaks
 
 
 def main():
@@ -35,7 +33,7 @@ def main():
         ax2.set_title('Binarized Unwrap Image', fontsize=10)
         plt.subplots_adjust(left=0., right=1, top=0.9, bottom=0.)
         plt.show()
-
+        find_peaks(binary)
 
 
 
