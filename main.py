@@ -284,7 +284,7 @@ class VideoProcessor:
         result = cv2.addWeighted(undist, 1, newwarp, 0.3, 0)
 
         texts = "L Curve: %d m, R Curve: %d m, Left from center %2f m" % \
-                (left_curverad, right_curverad, (self.W / 2 - (left_fitx[0] + right_fitx[0]) / 2) * (3.7 / 700))
+                (left_curverad, right_curverad, (self.W / 2 - (left_fitx[-1] + right_fitx[-1]) / 2) * (3.7 / 700))
         cv2.putText(result, texts, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2, cv2.LINE_AA)
 
         # Store x values of the last n fits of the line

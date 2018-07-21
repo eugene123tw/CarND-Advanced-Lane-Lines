@@ -122,4 +122,8 @@ Here's a [https://github.com/eugene123tw/CarND-Advanced-Lane-Lines/blob/master/p
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+For the camera calibration I used all the chessboard images provided to compute the camera matrix, distortion coefficients, rotation and translation vectors etc.
+
+Then un-distort the image based on camera matrix and distortion coefficients. Image binarization is done by applying a few color threshold methods. I applied 1. Sobel filter to threshold the gradient along X axis, 2. Red channel threshold for capturing yellow line, 3. LUV and 4. LAB threshold based on the suggestions from assignment reviewer. 
+
+The problem I am facing is the searching of polynomial curve line. Sometimes lighting and shadows affect the program detecting yellow lanes. Currently, I compare the slope parameters between the fitted left/right lane. If the sign of both slopes are not matched, then I use the previous fitted parameters for both lanes. Maybe I could apply some methods giving fitted parameters scores, so I could rectify based on the scores. 

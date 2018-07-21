@@ -49,7 +49,13 @@ def warp_image(img):
 
     return warped, M, Minv
 
-def binarization(img, s_thresh=(160, 240), sx_thresh=(20, 200), r_thresh=(220, 255)):
+def binarization(
+        img,
+        s_thresh=(160, 240),
+        sx_thresh=(20, 200),
+        r_thresh=(220, 255),
+        l_thresh=(155, 200),
+        b_thresh=(155, 200)):
     def hls_select(img, channel=2, thresh=(0, 255)):
         # 1) Convert to HLS color space
         # 2) Apply a threshold to the S channel
@@ -85,8 +91,25 @@ def binarization(img, s_thresh=(160, 240), sx_thresh=(20, 200), r_thresh=(220, 2
         binary_output[(img[:, :, 0] > thresh[0]) & (img[:, :, 0] <= thresh[1])] = 1
         return binary_output
 
+    def LUV_threshold(img, thresh=(225, 255)):
+        LUV = cv2.cvtColor(img, cv2.COLOR_RGB2LUV)
+        L = LUV[:, :, 0]
+        binary_output = np.zeros_like(L)
+        binary_output[(L > thresh[0]) & (L <= thresh[1])] = 1
+        return binary_output
+
+    def LAB_threshold(img, thresh=(155, 200)):
+        lab = cv2.cvtColor(img, cv2.COLOR_RGB2Lab)
+        L = lab[:, :, 2]
+        binary_output = np.zeros_like(L)
+        binary_output[(L > thresh[0]) & (L <= thresh[1])] = 1
+        return binary_output
+
     r_binary = red_threshold(img, thresh=r_thresh)
     s_binary = hls_select(img, 2, thresh=s_thresh)
+    l_binary = LUV_threshold(img, thresh=l_thresh)
+    y_binary = LAB_threshold(img, thresh=b_thresh)
+
     gradx = abs_sobel_thresh(img, orient='x', sobel_kernel=3, thresh_min=sx_thresh[0], thresh_max=sx_thresh[1])
 
     # Apply each of the thresholding functions
@@ -94,8 +117,10 @@ def binarization(img, s_thresh=(160, 240), sx_thresh=(20, 200), r_thresh=(220, 2
 
     binary[
         (gradx == 1)
+        | (l_binary==1)
         | (s_binary == 1)
         | (r_binary == 1)
+        | (y_binary == 1)
     ] = 1
     return binary
 
